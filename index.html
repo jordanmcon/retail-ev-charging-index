@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retail EV Charging Index — Electric Era 100</title>
+<style>
+  :root {
+    --ink: #1a1d21;
+    --muted: #62666c;
+    --line: #e3e2de;
+    --accent: #0a5c36;
+    --bg: #fbfaf7;
+    --row-alt: #f4f3ef;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 48px 24px 80px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  header { margin-bottom: 22px; border-bottom: 2px solid var(--ink); padding-bottom: 20px; }
+  h1 { font-size: 28px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .subtitle { color: var(--muted); font-size: 14px; margin: 0; }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0 18px;
+  }
+  #search {
+    flex: 1 1 220px;
+    min-width: 180px;
+    padding: 9px 12px;
+    font-size: 14px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--ink);
+  }
+  #search:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .seg-btn {
+    padding: 7px 13px;
+    font-size: 13px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--ink);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .seg-btn:hover { border-color: var(--accent); }
+  .seg-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  #resultCount { font-size: 12.5px; color: var(--muted); margin-left: auto; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--ink);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+  }
+  thead th:hover { color: var(--ink); }
+  thead th.sorted-asc::after { content: " \2191"; color: var(--accent); }
+  thead th.sorted-desc::after { content: " \2193"; color: var(--accent); }
+  tbody td { padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:nth-child(even) { background: var(--row-alt); }
+  tbody tr.hidden { display: none; }
+  .num { text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .company { font-weight: 600; }
+  .cx { color: #33363a; line-height: 1.45; max-width: 420px; }
+  th:nth-child(1), td:nth-child(1) { width: 44px; }
+  th:nth-child(4), td:nth-child(4) { width: 150px; }
+  th:nth-child(5), td:nth-child(5) { width: 70px; }
+  footer { margin-top: 24px; font-size: 12px; color: var(--muted); }
+  .no-results { padding: 24px 12px; text-align: center; color: var(--muted); display: none; }
+  @media (max-width: 720px) {
+    body { padding: 24px 12px 60px; }
+    table { font-size: 12px; }
+    .cx { max-width: none; }
+    #resultCount { margin-left: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Retail EV Charging Index</h1>
+    <p class="subtitle">The Electric Era 100 &mdash; top 50 US retailers by EV charging maturity. Click any column header to sort.</p>
+  </header>
+
+  <div class="controls">
+    <input type="text" id="search" placeholder="Search companies...">
+      <button class="seg-btn" data-segment="Big Box / General Retail">Big Box / General Retail</button>
+      <button class="seg-btn" data-segment="C-Store / Fuel Retail">C-Store / Fuel Retail</button>
+      <button class="seg-btn" data-segment="Food &amp; Beverage (QSR)">Food &amp; Beverage (QSR)</button>
+      <button class="seg-btn" data-segment="Grocery">Grocery</button>
+    <span id="resultCount"></span>
+  </div>
+
+  <table id="indexTable">
+    <thead>
+      <tr>
+        <th data-type="num">Rank</th>
+        <th data-type="text">Company</th>
+        <th data-type="text">Segment</th>
+        <th data-type="text">Deployed Stations</th>
+        <th data-type="num">Quality Score</th>
+        <th data-type="text">Customer Experience</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr data-segment="C-Store / Fuel Retail" data-company="casey&#x27;s">
+        <td class="num" data-sort="1">1</td>
+        <td class="company">Casey&#x27;s</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">282 (+8 committed)</td>
+        <td class="num" data-sort="67">67</td>
+        <td class="cx">Deliberately slow, measured rollout per CEO comments citing thin EV demand vs. coastal markets; new IONNA Rechargery partnership is IONNA-branded, not Casey&#x27;s-first</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="alimentation couche-tard (circle k, getgo cafe + market)">
+        <td class="num" data-sort="2">2</td>
+        <td class="company">Alimentation Couche-Tard (Circle K, GetGo Cafe + Market)</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">86 (+265 committed)</td>
+        <td class="num" data-sort="71">71</td>
+        <td class="cx">Built its own branded &quot;Circle K Charge&quot; app-based network, but is now transitioning operation of its US buildout to IONNA — shifting from a self-branded program toward a co-branded/partner-operated one Also now includes GetGo Cafe + Market (formerly Giant Eagle’s banner), acquired 2025.</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="bp (thorntons, travelcenters of america)">
+        <td class="num" data-sort="3">3</td>
+        <td class="company">BP (Thorntons, TravelCenters of America)</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">89</td>
+        <td class="num" data-sort="65">65</td>
+        <td class="cx">Dedicated bp pulse app across the family (bp, Amoco, ampm, Thorntons, TA); Gigahub sites include lounge/vending/restroom/wifi amenities beyond just charging -- one of the more full-featured amenity builds in the dataset</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="sheetz">
+        <td class="num" data-sort="4">4</td>
+        <td class="company">Sheetz</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">125 (+50 committed)</td>
+        <td class="num" data-sort="66">66</td>
+        <td class="cx">&quot;Rechargery&quot; branded canopied stalls integrated with full food/convenience amenities; Sheetz app loyalty tie-in planned; ranked as c-store EV leader alongside Wawa (Consumer Reports); IONNA branding now prominent at stations, co-branded/replacing Sheetz-first identity</td>
+      </tr>
+      <tr data-segment="Big Box / General Retail" data-company="wawa">
+        <td class="num" data-sort="5">5</td>
+        <td class="company">Wawa</td>
+        <td>Big Box / General Retail</td>
+        <td class="num">150</td>
+        <td class="num" data-sort="66">66</td>
+        <td class="cx">Self-branded Tesla V4 stalls w/ plug-and-charge, live wait times, preconditioning; full c-store food/beverage amenities on site; Tesla Supercharger branding prominent at stations</td>
+      </tr>
+      <tr data-segment="Big Box / General Retail" data-company="target">
+        <td class="num" data-sort="6">6</td>
+        <td class="company">Target</td>
+        <td>Big Box / General Retail</td>
+        <td class="num">300 (+135 committed)</td>
+        <td class="num" data-sort="64">64</td>
+        <td class="cx">Positioned as part of a one-stop-shop trip alongside in-store Starbucks/CVS; SOC limits used at busy sites to manage congestion; runs on third-party apps (ChargePoint/Tesla/EA), not a dedicated Target-branded program</td>
+      </tr>
+      <tr data-segment="Big Box / General Retail" data-company="walmart">
+        <td class="num" data-sort="7">7</td>
+        <td class="company">Walmart</td>
+        <td>Big Box / General Retail</td>
+        <td class="num">90</td>
+        <td class="num" data-sort="67">67</td>
+        <td class="cx">Charging integrated directly into the Walmart app (start/pay via QR code); Walmart-first branding extremely prominent at stations despite ABB/Alpitronic hardware underneath</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="7-eleven (speedway)">
+        <td class="num" data-sort="8">8</td>
+        <td class="company">7-Eleven (Speedway)</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">53</td>
+        <td class="num" data-sort="62">62</td>
+        <td class="cx">7Charge branded, app-based network; company states ambition to build &quot;one of the largest and most compatible&quot; EV networks of any North American retailer; consolidated parent entry — includes Speedway</td>
+      </tr>
+      <tr data-segment="Big Box / General Retail" data-company="costco wholesale">
+        <td class="num" data-sort="9">9</td>
+        <td class="company">Costco Wholesale</td>
+        <td>Big Box / General Retail</td>
+        <td class="num">46</td>
+        <td class="num" data-sort="71">71</td>
+        <td class="cx">Costco branding is primary on all its chargers (not EA/vendor-first); runs on Electrify America&#x27;s network app for payment; no confirmed member-exclusive pricing yet despite early announcements</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="kwik trip">
+        <td class="num" data-sort="10">10</td>
+        <td class="company">Kwik Trip</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">8</td>
+        <td class="num" data-sort="65">65</td>
+        <td class="cx">Kwik Rewards app supports order-ahead delivery to your car while charging; staffed 24/7 locations; &quot;Kwik Charge&quot; is a fully self-branded program</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="pilot flying j">
+        <td class="num" data-sort="11">11</td>
+        <td class="company">Pilot Flying J</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">200</td>
+        <td class="num" data-sort="58">58</td>
+        <td class="cx">Part of the &quot;New Horizons&quot; remodel initiative pairing chargers with upgraded restrooms/dining; runs on EVgo&#x27;s branded network/app, not a dedicated Pilot-first program</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="gpm investments">
+        <td class="num" data-sort="12">12</td>
+        <td class="company">GPM Investments</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">39 (+57 committed)</td>
+        <td class="num" data-sort="55">55</td>
+        <td class="cx">Stations heavily branded with GPM&#x27;s own identity as the prominent brand, not the hardware manufacturer or charge point operator — one of the stronger branding efforts found among vendor-partnership deployments</td>
+      </tr>
+      <tr data-segment="Big Box / General Retail" data-company="applegreen">
+        <td class="num" data-sort="13">13</td>
+        <td class="company">Applegreen</td>
+        <td>Big Box / General Retail</td>
+        <td class="num">8</td>
+        <td class="num" data-sort="62">62</td>
+        <td class="cx">Own-branded &quot;Applegreen Electric&quot; app-based network (no membership required); part of a $1B multi-year travel-plaza investment</td>
+      </tr>
+      <tr data-segment="Big Box / General Retail" data-company="love&#x27;s">
+        <td class="num" data-sort="14">14</td>
+        <td class="company">Love&#x27;s</td>
+        <td>Big Box / General Retail</td>
+        <td class="num">36</td>
+        <td class="num" data-sort="71">71</td>
+        <td class="cx">Love&#x27;s-first branding extremely prominent at stations despite Electrify America partnership underneath; positions charging near highway off-ramps with 24/7 staffed amenities</td>
+      </tr>
+      <tr data-segment="Grocery" data-company="whole foods market">
+        <td class="num" data-sort="15">15</td>
+        <td class="company">Whole Foods Market</td>
+        <td>Grocery</td>
+        <td class="num">389 (mostly Level 2)</td>
+        <td class="num" data-sort="62">62</td>
+        <td class="cx">Charging present at many locations but not owned/operated by Whole Foods/Amazon; increasingly shifting from free to paid/metered as vendors take over pricing; positioned as a shopping-trip convenience rather than a branded Whole Foods/Amazon initiative</td>
+      </tr>
+      <tr data-segment="Grocery" data-company="kroger (king soopers, ralphs, fred meyer, harris teeter, dillons)">
+        <td class="num" data-sort="16">16</td>
+        <td class="company">Kroger (King Soopers, Ralphs, Fred Meyer, Harris Teeter, Dillons)</td>
+        <td>Grocery</td>
+        <td class="num">~100 (est. from 350 chargers)</td>
+        <td class="num" data-sort="64">64</td>
+        <td class="cx">Multi-vendor site-host deployment across 5 different charging brands -- no single unified Kroger-branded app or program; positioning centers on convenient charging during a typical grocery shopping trip; consolidated parent entry -- includes King Soopers, Ralphs, Fred Meyer, Harris Teeter, Dillons</td>
+      </tr>
+      <tr data-segment="Grocery" data-company="winco foods">
+        <td class="num" data-sort="17">17</td>
+        <td class="company">WinCo Foods</td>
+        <td>Grocery</td>
+        <td class="num">35</td>
+        <td class="num" data-sort="58">58</td>
+        <td class="cx">Runs on EVgo&#x27;s branded network, not a dedicated WinCo-first program</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="jacksons food stores (extramile convenience stores)">
+        <td class="num" data-sort="18">18</td>
+        <td class="company">Jacksons Food Stores (Extramile Convenience Stores)</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">9</td>
+        <td class="num" data-sort="58">58</td>
+        <td class="cx">Sites feature solar canopy, security cameras, WiFi, and a digital kiosk integrated with both Jacksons and OnPoint apps; consolidated parent entry — includes ExtraMile/Extramile Convenience Stores</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="buc-ee&#x27;s">
+        <td class="num" data-sort="19">19</td>
+        <td class="company">Buc-ee&#x27;s</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">14 (+16 committed)</td>
+        <td class="num" data-sort="67">67</td>
+        <td class="cx">Mercedes-Benz HPC branding shared/co-branded at stations rather than Buc-ee&#x27;s-first; massive travel-center format (fuel + retail + food) surrounds the charging experience — the surrounding Buc-ee&#x27;s retail/food experience itself is exceptionally strong, even though the charging hardware/branding is Mercedes-Benz-first</td>
+      </tr>
+      <tr data-segment="Big Box / General Retail" data-company="kohls">
+        <td class="num" data-sort="20">20</td>
+        <td class="company">Kohls</td>
+        <td>Big Box / General Retail</td>
+        <td class="num">150 (Level 2 only — see Scale note)</td>
+        <td class="num" data-sort="67">67</td>
+        <td class="cx">Free to customers, prominently placed near front doors; runs on Volta&#x27;s branded network, not a dedicated Kohl&#x27;s-first program</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="racetrac">
+        <td class="num" data-sort="21">21</td>
+        <td class="company">RaceTrac</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">6</td>
+        <td class="num" data-sort="62">62</td>
+        <td class="cx">Canopied stations under RaceTrac&#x27;s own &quot;Electric Highway&quot; branding; slow, deliberate rollout pace (&quot;no net-zero targets,&quot; fuel-agnostic positioning); no dedicated app/loyalty tie-in found</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="royal farms">
+        <td class="num" data-sort="22">22</td>
+        <td class="company">Royal Farms</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">8</td>
+        <td class="num" data-sort="60">60</td>
+        <td class="cx">ROFO Rewards loyalty app has an EV charging locator feature, but the chargers themselves run on Electrify America&#x27;s branded network, not Royal Farms-first</td>
+      </tr>
+      <tr data-segment="Big Box / General Retail" data-company="oncue">
+        <td class="num" data-sort="23">23</td>
+        <td class="company">OnCue</td>
+        <td>Big Box / General Retail</td>
+        <td class="num">6</td>
+        <td class="num" data-sort="62">62</td>
+        <td class="cx">Company states its own branded operating EV stations, all Level-3 fast chargers — appears to be a self-branded program</td>
+      </tr>
+      <tr data-segment="Food &amp; Beverage (QSR)" data-company="bojangles">
+        <td class="num" data-sort="24">24</td>
+        <td class="company">Bojangles</td>
+        <td>Food &amp; Beverage (QSR)</td>
+        <td class="num">1</td>
+        <td class="num" data-sort="55">55</td>
+        <td class="cx">Branded &quot;charge-and-dine&quot; concept — bright yellow Bojangles-branded charging stations (XCharge C7, 240kW, CCS1+NACS) positioned as a genuine QSR dwell-time amenity; company claims &gt;97% uptime (self-reported, not third-party verified)</td>
+      </tr>
+      <tr data-segment="Grocery" data-company="albertsons (safeway, acme markets, shaw&#x27;s, jewel-osco, united supermarkets)">
+        <td class="num" data-sort="25">25</td>
+        <td class="company">Albertsons (Safeway, ACME Markets, Shaw&#x27;s, Jewel-Osco, United Supermarkets)</td>
+        <td>Grocery</td>
+        <td class="num">30+ (Level 2)</td>
+        <td class="num" data-sort="67">67</td>
+        <td class="cx">Volta-branded (with sponsor-supported digital displays); consolidated parent entry -- includes Safeway, ACME Markets; no unified Albertsons-branded program or app found</td>
+      </tr>
+      <tr data-segment="Food &amp; Beverage (QSR)" data-company="starbucks">
+        <td class="num" data-sort="26">26</td>
+        <td class="company">Starbucks</td>
+        <td>Food &amp; Beverage (QSR)</td>
+        <td class="num">15</td>
+        <td class="num" data-sort="66">66</td>
+        <td class="cx">Split across Mercedes-Benz HPC and Volvo/ChargePoint branded placements — no unified Starbucks-first program; broader international deployments follow the same partner-branded pattern — genuine dwell-time amenity (coffee, wifi, seating) even without a unified charging-specific program</td>
+      </tr>
+      <tr data-segment="Grocery" data-company="gelson&#x27;s">
+        <td class="num" data-sort="27">27</td>
+        <td class="company">Gelson&#x27;s</td>
+        <td>Grocery</td>
+        <td class="num">1</td>
+        <td class="num" data-sort="58">58</td>
+        <td class="cx">Own-branded &quot;ReCharge&quot; concept (operated by partner Rove) — among the more distinctly branded single-site builds found among smaller grocers</td>
+      </tr>
+      <tr data-segment="Big Box / General Retail" data-company="ahold delhaize usa (stop &amp; shop, food lion, giant food, hannaford)">
+        <td class="num" data-sort="28">28</td>
+        <td class="company">Ahold Delhaize USA (Stop &amp; Shop, Food Lion, Giant Food, Hannaford)</td>
+        <td>Big Box / General Retail</td>
+        <td class="num">20</td>
+        <td class="num" data-sort="64">64</td>
+        <td class="cx">No unified company-wide EV charging network found; activity is banner-by-banner (Hannaford, Stop &amp; Shop, Food Lion) and largely state-grant-driven rather than a cohesive Ahold-first program</td>
+      </tr>
+      <tr data-segment="Grocery" data-company="meijer">
+        <td class="num" data-sort="29">29</td>
+        <td class="company">Meijer</td>
+        <td>Grocery</td>
+        <td class="num">24 (+54 committed)</td>
+        <td class="num" data-sort="58">58</td>
+        <td class="cx">Meijer claims a large share of locations have &quot;EV charging options,&quot; though this likely blends older Level 2 with newer DCFC; runs on EVgo&#x27;s branded network, not Meijer-first</td>
+      </tr>
+      <tr data-segment="Big Box / General Retail" data-company="ikea">
+        <td class="num" data-sort="30">30</td>
+        <td class="company">IKEA</td>
+        <td>Big Box / General Retail</td>
+        <td class="num">25</td>
+        <td class="num" data-sort="60">60</td>
+        <td class="cx">Ultra-fast charging via an announced Electrify America collaboration, plus a separate fleet-electrification program for IKEA delivery vehicles; charging itself runs on Electrify America&#x27;s branded network, not IKEA-first</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="stewart&#x27;s shops">
+        <td class="num" data-sort="31">31</td>
+        <td class="company">Stewart&#x27;s Shops</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">11</td>
+        <td class="num" data-sort="64">64</td>
+        <td class="cx">Split between Tesla Supercharger branding and EVolve NY (NYPA)-branded DCFC sites — no unified Stewart&#x27;s-first program</td>
+      </tr>
+      <tr data-segment="Big Box / General Retail" data-company="festival foods">
+        <td class="num" data-sort="32">32</td>
+        <td class="company">Festival Foods</td>
+        <td>Big Box / General Retail</td>
+        <td class="num">8</td>
+        <td class="num" data-sort="71">71</td>
+        <td class="cx">Mix of Tesla Supercharger branding and additional DCFC/Level 2 stations per company FAQ — no unified Festival Foods-first program</td>
+      </tr>
+      <tr data-segment="Grocery" data-company="harmons grocery">
+        <td class="num" data-sort="33">33</td>
+        <td class="company">Harmons Grocery</td>
+        <td>Grocery</td>
+        <td class="num">2 (Level 2 only)</td>
+        <td class="num" data-sort="62">62</td>
+        <td class="cx">Company states chargers are free for customers/associates — a genuine self-funded amenity rather than a vendor-hosted arrangement</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="united dairy farmers">
+        <td class="num" data-sort="34">34</td>
+        <td class="company">United Dairy Farmers</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">0</td>
+        <td class="num" data-sort="71">71</td>
+        <td class="cx">Forward-looking commitment, not yet live; no dedicated app or loyalty tie-in confirmed</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="parker&#x27;s">
+        <td class="num" data-sort="35">35</td>
+        <td class="company">Parker&#x27;s</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">1</td>
+        <td class="num" data-sort="71">71</td>
+        <td class="cx">Company publicly promoted its Tesla Supercharger installation with CEO/president statements, but branding at the stalls themselves is Tesla-first, not Parker&#x27;s-first</td>
+      </tr>
+      <tr data-segment="Grocery" data-company="aldi usa">
+        <td class="num" data-sort="36">36</td>
+        <td class="company">ALDI USA</td>
+        <td>Grocery</td>
+        <td class="num">22</td>
+        <td class="num" data-sort="60">60</td>
+        <td class="cx">Multi-vendor site-host deployment; original 2021 rollout target fell far short of expectations -- no unified ALDI-branded program or app found</td>
+      </tr>
+      <tr data-segment="Big Box / General Retail" data-company="global partners">
+        <td class="num" data-sort="37">37</td>
+        <td class="company">Global Partners</td>
+        <td>Big Box / General Retail</td>
+        <td class="num">1</td>
+        <td class="num" data-sort="71">71</td>
+        <td class="cx">Grant-funded deployment (MassCEC, Efficiency Maine) — no dedicated Global Partners-branded app or loyalty tie-in found; also an Electric Era client</td>
+      </tr>
+      <tr data-segment="Grocery" data-company="stater bros. markets">
+        <td class="num" data-sort="38">38</td>
+        <td class="company">Stater Bros. Markets</td>
+        <td>Grocery</td>
+        <td class="num">1</td>
+        <td class="num" data-sort="71">71</td>
+        <td class="cx">Tesla Supercharger branding at the site, not Stater Bros-first; no dedicated app/loyalty tie-in found</td>
+      </tr>
+      <tr data-segment="Grocery" data-company="raley&#x27;s">
+        <td class="num" data-sort="39">39</td>
+        <td class="company">Raley&#x27;s</td>
+        <td>Grocery</td>
+        <td class="num">4</td>
+        <td class="num" data-sort="58">58</td>
+        <td class="cx">Branded &quot;EV Fast Charging Corridor&quot; concept — one of the more distinctly self-branded grocery programs found, alongside additional EVgo-listed sites</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="sapp bros">
+        <td class="num" data-sort="40">40</td>
+        <td class="company">Sapp Bros</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">3</td>
+        <td class="num" data-sort="71">71</td>
+        <td class="cx">Tesla Supercharger branding at the sites, not Sapp Bros-first; no dedicated app/loyalty tie-in found</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="chevron">
+        <td class="num" data-sort="41">41</td>
+        <td class="company">Chevron</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">1</td>
+        <td class="num" data-sort="58">58</td>
+        <td class="cx">Confirmed pilot site in San Ramon, CA (Mar 2026); partnership first announced 2022, still appears to be in early/pilot rollout stage 4 years later</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="weigel&#x27;s">
+        <td class="num" data-sort="42">42</td>
+        <td class="company">Weigel&#x27;s</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">1</td>
+        <td class="num" data-sort="62">62</td>
+        <td class="cx">Charging listed as a store amenity on the company&#x27;s own site; chargers themselves run on ChargePoint&#x27;s branded network, not Weigel&#x27;s-first</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="mirabito holdings">
+        <td class="num" data-sort="43">43</td>
+        <td class="company">Mirabito Holdings</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">6 (+4 committed)</td>
+        <td class="num" data-sort="64">64</td>
+        <td class="cx">NYPA-branded EVolve NY hubs, not Mirabito-branded</td>
+      </tr>
+      <tr data-segment="Grocery" data-company="wakefern food">
+        <td class="num" data-sort="44">44</td>
+        <td class="company">Wakefern Food</td>
+        <td>Grocery</td>
+        <td class="num">5</td>
+        <td class="num" data-sort="59">59</td>
+        <td class="cx">Cooperative-wide real estate team coordinates siting via EVgo-branded ribbon-cutting events, but rollout depends on individual member store owners rather than a unified Wakefern/ShopRite-first program</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="town pump">
+        <td class="num" data-sort="45">45</td>
+        <td class="company">Town Pump</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">21</td>
+        <td class="num" data-sort="55">55</td>
+        <td class="cx">No loyalty/app integration found; company also operates Pilot/Flying J and Exxon/Conoco fuel brands separately</td>
+      </tr>
+      <tr data-segment="Big Box / General Retail" data-company="yoke&#x27;s fresh market">
+        <td class="num" data-sort="46">46</td>
+        <td class="company">Yoke&#x27;s Fresh Market</td>
+        <td>Big Box / General Retail</td>
+        <td class="num">2</td>
+        <td class="num" data-sort="64">64</td>
+        <td class="cx">Split between EV Connect-branded and Tesla Supercharger-branded stalls — no unified Yoke&#x27;s-first program</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="phillips 66">
+        <td class="num" data-sort="47">47</td>
+        <td class="company">Phillips 66</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">1</td>
+        <td class="num" data-sort="58">58</td>
+        <td class="cx">Only 1 confirmed live site (Houston flagship, first commissioned in Texas) despite the partnership being announced back in 2022 -- a very slow rollout relative to the stated ~7,000-site ambition</td>
+      </tr>
+      <tr data-segment="Big Box / General Retail" data-company="fareway stores">
+        <td class="num" data-sort="48">48</td>
+        <td class="company">Fareway Stores</td>
+        <td>Big Box / General Retail</td>
+        <td class="num">4</td>
+        <td class="num" data-sort="55">55</td>
+        <td class="cx">Corporate-level commitment behind the hosted fast-charging sites, though branding at the stalls is vendor-first, not Fareway-first</td>
+      </tr>
+      <tr data-segment="Big Box / General Retail" data-company="space age fuel">
+        <td class="num" data-sort="49">49</td>
+        <td class="company">Space Age Fuel</td>
+        <td>Big Box / General Retail</td>
+        <td class="num">1</td>
+        <td class="num" data-sort="71">71</td>
+        <td class="cx">Runs on Electrify America&#x27;s branded network, not Space Age Fuel-first; also an Electric Era client</td>
+      </tr>
+      <tr data-segment="C-Store / Fuel Retail" data-company="stinker stores">
+        <td class="num" data-sort="50">50</td>
+        <td class="company">Stinker Stores</td>
+        <td>C-Store / Fuel Retail</td>
+        <td class="num">1</td>
+        <td class="num" data-sort="60">60</td>
+        <td class="cx">No dedicated app, loyalty tie-in, or branded program identified</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="no-results" id="noResults">No companies match your filters.</p>
+
+  <footer>
+    Quality Score is sourced from J.D. Power's 2025 EVX Public Charging Study (network satisfaction, rescaled to 100), matched by which charging network each retailer uses. Deployed Stations shows live DCFC site count only (estimated where noted); Level 2-only deployments are flagged. Customer Experience reflects brand and retail-program integration only, not station or stall counts.
+  </footer>
+</div>
+
+<script>
+(function() {
+  const table = document.getElementById('indexTable');
+  const tbody = table.querySelector('tbody');
+  const headers = table.querySelectorAll('thead th');
+  const searchInput = document.getElementById('search');
+  const segButtons = document.querySelectorAll('.seg-btn');
+  const resultCount = document.getElementById('resultCount');
+  const noResults = document.getElementById('noResults');
+  let activeSegment = null;
+  let sortState = { col: 0, dir: 'asc' };
+
+  function getRows() { return Array.from(tbody.querySelectorAll('tr')); }
+
+  function applyFilters() {
+    const q = searchInput.value.trim().toLowerCase();
+    let visible = 0;
+    getRows().forEach(row => {
+      const matchesSearch = !q || row.dataset.company.includes(q);
+      const matchesSegment = !activeSegment || row.dataset.segment === activeSegment;
+      const show = matchesSearch && matchesSegment;
+      row.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+    resultCount.textContent = visible + ' of ' + getRows().length + ' companies';
+    noResults.style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  searchInput.addEventListener('input', applyFilters);
+
+  segButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const seg = btn.dataset.segment;
+      if (activeSegment === seg) {
+        activeSegment = null;
+        btn.classList.remove('active');
+      } else {
+        segButtons.forEach(b => b.classList.remove('active'));
+        activeSegment = seg;
+        btn.classList.add('active');
+      }
+      applyFilters();
+    });
+  });
+
+  headers.forEach((th, colIndex) => {
+    th.addEventListener('click', () => {
+      const type = th.dataset.type;
+      const dir = (sortState.col === colIndex && sortState.dir === 'asc') ? 'desc' : 'asc';
+      sortState = { col: colIndex, dir: dir };
+
+      headers.forEach(h => h.classList.remove('sorted-asc', 'sorted-desc'));
+      th.classList.add(dir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+
+      const rows = getRows();
+      rows.sort((a, b) => {
+        const cellA = a.children[colIndex];
+        const cellB = b.children[colIndex];
+        let valA, valB;
+        if (type === 'num') {
+          valA = parseFloat(cellA.dataset.sort);
+          valB = parseFloat(cellB.dataset.sort);
+        } else {
+          valA = cellA.textContent.trim().toLowerCase();
+          valB = cellB.textContent.trim().toLowerCase();
+        }
+        if (valA < valB) return dir === 'asc' ? -1 : 1;
+        if (valA > valB) return dir === 'asc' ? 1 : -1;
+        return 0;
+      });
+      rows.forEach(row => tbody.appendChild(row));
+    });
+  });
+
+  applyFilters();
+})();
+</script>
+</body>
+</html>
